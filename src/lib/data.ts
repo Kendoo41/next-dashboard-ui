@@ -1060,3 +1060,5 @@ export const calendarEvents = [
     end: new Date( 2025, 5, 26, 14, 45),
   },
 ];
+
+export const role = "admin";
