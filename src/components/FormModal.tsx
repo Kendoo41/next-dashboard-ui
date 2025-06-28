@@ -1,5 +1,40 @@
 'use client'
+import { announcementsData, assignmentsData } from "@/lib/data";
+import dynamic from "next/dynamic";
 import Image from "next/image";
+import { eventNames } from "process";
+import { useState } from "react";
+// import TeacherForm from "./forms/TeacherForm";
+// import StudentForm from "./forms/StudentForm";
+
+const TeacherForm = dynamic(() => import("./forms/TeacherForm"));
+const StudentForm = dynamic(() => import("./forms/StudentForm"));
+const ParentForm = dynamic(() => import("./forms/ParentForm"));
+const SubjectForm = dynamic(() => import("./forms/SubjectForm"));
+const LessonForm = dynamic(() => import("./forms/LessonForm"));
+const ClassForm = dynamic(() => import("./forms/ClassForm"));
+const ExamForm = dynamic(() => import("./forms/ExamForm"));
+const EventForm = dynamic(() => import("./forms/EventForm"));
+const ResultForm = dynamic(() => import("./forms/ResultForm"));
+const AssignmentForm = dynamic(() => import("./forms/AssignmentForm"));
+const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"));
+
+
+const forms: {
+  [key: string]: (type:"create" | "update", data?: any) => JSX.Element
+} = {
+  teacher: (type, data) => <TeacherForm type={type} data={data} />,
+  student: (type, data) => <StudentForm type={type} data={data} />,
+  parent:  (type, data) => <ParentForm  type={type} data={data} />,
+  subject: (type, data) => <SubjectForm type={type} data={data} />,
+  class:   (type, data) => <ClassForm   type={type} data={data} />,
+  lesson:  (type, data) => <LessonForm  type={type} data={data} />,
+  exam:    (type, data) => <ExamForm    type={type} data={data} />,
+  event:   (type, data) => <EventForm   type={type} data={data} />,
+  result:  (type, data) => <ResultForm  type={type} data={data} />,
+  assignment:    (type, data) => <AssignmentForm    type={type} data={data} />,
+  announcement:  (type, data) => <AnnouncementForm  type={type} data={data} />,
+};
 
 const FormModal = ({table, type, data, id}:{
   table: 
@@ -22,11 +57,42 @@ const FormModal = ({table, type, data, id}:{
   const size = type === "update" ? "w-8 h-8" : "w-7 h-7"
   const bgColor = type === "create" ? "bg-lamaYellow" : type === "update" ? "bg-lamaSky" : "bg-lamaPurple"
 
+  const [open, setOpen] = useState(false);
+
+  const Form = () => {
+    return type === "delete" && id ? (
+    <form action="" className="p-4 flex flex-col justify-center items-center gap-4">
+      <span className="text-center font-medium">All data will be lost. Are you sure to delete all items {table}?</span>
+      <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">Delete</button>
+    </form> 
+    ) : type === "create" || type === "update" ? (
+      // <TeacherForm type={"create"}/>
+      forms[table](type, data)
+    ) : "Form not found";
+  }
+
+
+
   return (
-    <button className={`${size} ${bgColor} flex items-center justify-center rounded-full`}>
-      <Image src={`/${type}.png`} alt="" width={20} height={20}></Image>
-    </button>
-  )
-}
+    <>
+      <button 
+        className={`${size} ${bgColor} flex items-center justify-center rounded-full`}
+        onClick={() => setOpen(true)}
+      >
+        <Image src={`/${type}.png`} alt="" width={20} height={20}></Image>
+      </button>
+      { open && (
+        <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:[40%]">
+            <Form/>
+            <div className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpen(false)}>
+              <Image src="/close.png" alt="" width={14} height={14}></Image>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 export default FormModal
