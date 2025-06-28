@@ -52,16 +52,14 @@ const ClassListPage = () => {
       <td className="hidden md:table-cell">{item.supervisor}</td>
       <td>
         <div className="flex flex-row items-center gap-2">
-          <Link href={`/list/teachers/${item.id}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky"> 
-              <Image src="/edit.png" alt="" width={16} height={16}></Image>
-            </button>
-          </Link>
             {role === "admin" && (
               // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
               //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
               // </button>
-              <FormModal table="class" type="delete" id={item.id}></FormModal>
+              <>
+                <FormModal table="class" type="update" data={item}></FormModal>
+                <FormModal table="class" type="delete" id={item.id}></FormModal>
+              </>
             )}
         </div>
       </td>

@@ -61,7 +61,10 @@ const AssignmentListPage = () => {
               // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
               //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
               // </button>
-              <FormModal table="assignment" type="delete" id={item.id}></FormModal>
+              <>
+                <FormModal table="assignment" type="update" data={item}></FormModal>
+                <FormModal table="assignment" type="delete" id={item.id}></FormModal>
+              </>
             )}
         </div>
       </td>

@@ -41,15 +41,15 @@ const SubjectListPage = () => {
       <td>
         <div className="flex flex-row items-center gap-2">
           <Link href={`/list/teachers/${item.id}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky"> 
-              <Image src="/view.png" alt="" width={16} height={16}></Image>
-            </button>
           </Link>
             {role === "admin" && (
               // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
               //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
               // </button>
-              <FormModal table="subject" type="delete" id={item.id}></FormModal>
+              <>
+                <FormModal table="subject" type="update" data={item}></FormModal>
+                <FormModal table="subject" type="delete" id={item.id}></FormModal>
+              </>
           )}
         </div>
       </td>

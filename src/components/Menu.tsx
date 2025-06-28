@@ -141,7 +141,7 @@ const menuItems = [
 //   )
 // }
 
-const role = 'student';
+const role = 'admin';
 const Menu = () => {
   return (
     <div className="mt-4 text-sm">
