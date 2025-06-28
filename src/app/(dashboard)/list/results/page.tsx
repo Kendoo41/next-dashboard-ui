@@ -4,6 +4,7 @@ import Table from "@/components/Table"
 import { resultsData } from "@/lib/data"
 import Image from "next/image"
 import Link from "next/link"
+import FormModal from "@/components/FormModal"
 
 const role = "admin";
 
@@ -71,9 +72,12 @@ const ResultListPage = () => {
               <Image src="/edit.png" alt="" width={16} height={16}></Image>
             </button>
           </Link>
-            {role === "admin" && (<button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
-              <Image src="/delete.png" alt="" width={16} height={16}></Image>
-            </button>)}
+            {role === "admin" && (
+              // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
+              //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
+              // </button>
+              <FormModal table="teacher" type="delete" id={item.id}></FormModal>
+          )}
         </div>
       </td>
     </tr>
