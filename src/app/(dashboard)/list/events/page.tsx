@@ -1,109 +1,165 @@
-import TableSearch from "@/components/TableSearch"
-import Pagination from "@/components/Pagination"
-import Table from "@/components/Table"
-import { eventsData } from "@/lib/data"
-import Image from "next/image"
-import Link from "next/link"
-import FormModal from "@/components/FormModal"
+import TableSearch from "@/components/TableSearch";
+import Pagination from "@/components/Pagination";
+import Table from "@/components/Table";
+import { eventsData } from "@/lib/data";
+import Image from "next/image";
+import Link from "next/link";
+import FormModal from "@/components/FormModal";
+import prisma from "@/lib/prisma";
+import { Class, Prisma, Event } from "@prisma/client";
+import { ITEM_PER_PAGE } from "@/lib/setting";
 
 const role = "admin";
 
-type Event = {
-  id:number;
-  title:string;
-  class:string;
-  date:string;
-  startTime:string;
-  endTime:string;
-}
+type EventList = Event & { class: Class };
 
 const columns = [
   {
-    header:"Title", 
-    accessor:"title", 
+    header: "Title",
+    accessor: "title",
   },
   {
-    header:"Class", 
-    accessor:"class", 
+    header: "Class",
+    accessor: "class",
   },
   {
-    header:"Date", 
-    accessor:"date", 
-    className:"hidden md:table-cell"
+    header: "Date",
+    accessor: "date",
+    className: "hidden md:table-cell",
   },
   {
-    header:"Start Time", 
-    accessor:"startTime", 
-    className:"hidden md:table-cell"
+    header: "Start Time",
+    accessor: "startTime",
+    className: "hidden md:table-cell",
   },
   {
-    header:"End Time", 
-    accessor:"endTime", 
-    className:"hidden md:table-cell"
+    header: "End Time",
+    accessor: "endTime",
+    className: "hidden md:table-cell",
   },
   {
-    header:"Action", 
-    accessor:"action", 
+    header: "Action",
+    accessor: "action",
   },
-]
-const EventListPage = () => {
-  
-  const renderRow = (item:Event) => (
-    <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight">
-      <td className="flex items-center gap-4 p-4">
-        {item.title}
-      </td>
-      <td>{item.class}</td>
-      <td className="hidden md:table-cell">{item.date}</td>
-      <td className="hidden md:table-cell">{item.startTime}</td>
-      <td className="hidden md:table-cell">{item.endTime}</td>
-      <td>
-        <div className="flex flex-row items-center gap-2">
-            {role === "admin" && (
-              // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple"> 
-              //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
-              // </button>
-              <>
-                <FormModal table="event" type="update" data={item}></FormModal>
-                <FormModal table="event" type="delete" id={item.id}></FormModal>
-              </>
-            )}
-        </div>
-      </td>
-    </tr>
-  )  // End function renderRow
+];
+
+const renderRow = (item: EventList) => (
+  <tr
+    key={item.id}
+    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+  >
+    <td className="flex items-center gap-4 p-4">{item.title}</td>
+    <td>{item.class.name}</td>
+    <td className="hidden md:table-cell">
+      {new Intl.DateTimeFormat("en-US").format(item.startTime)}
+    </td>
+    <td className="hidden md:table-cell">
+      {item.startTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })}
+    </td>
+    <td className="hidden md:table-cell">
+      {item.endTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })}
+    </td>
+    <td>
+      <div className="flex flex-row items-center gap-2">
+        {role === "admin" && (
+          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
+          //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
+          // </button>
+          <>
+            <FormModal table="event" type="update" data={item}></FormModal>
+            <FormModal table="event" type="delete" id={item.id}></FormModal>
+          </>
+        )}
+      </div>
+    </td>
+  </tr>
+); // End function renderRow
+
+const EventListPage = async ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) => {
+  const { page, ...queryParams } = searchParams;
+
+  const p = page ? parseInt(page) : 1;
+
+  // URL PARAMS CONDITION
+  const query: Prisma.EventWhereInput = {};
+
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "search":
+            query.title = {
+              contains: value,
+              mode: "insensitive",
+            };
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.event.findMany({
+      where: query,
+
+      include: {
+        class: { select: { name: true } },
+      },
+
+      take: ITEM_PER_PAGE,
+
+      skip: ITEM_PER_PAGE * (p - 1),
+    }),
+
+    prisma.event.count({
+      where: query,
+    }),
+  ]);
 
   return (
-    <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0" >
-
+    <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
       {/* TOP  */}
       <div className="flex justify-between items-center">
         <h1 className="hidden md:block text-lg font-semibold">All Events</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch/>
+          <TableSearch />
           <div className="flex items-center gap-4 self-end">
-              <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-                <Image src="/filter.png" alt="" width={14} height={14}/>
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-                <Image src="/sort.png" alt="" width={14} height={14}/>
-              </button>
-              {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+              <Image src="/filter.png" alt="" width={14} height={14} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+              <Image src="/sort.png" alt="" width={14} height={14} />
+            </button>
+            {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
-              <FormModal table="event" type="create"></FormModal>
+            <FormModal table="event" type="create"></FormModal>
           </div>
-
         </div>
       </div>
 
       {/* LIST  */}
-      <Table columns={columns} renderRow={renderRow} data={eventsData}></Table>
+      <Table columns={columns} renderRow={renderRow} data={data}></Table>
 
       {/* PAGINATION  */}
-      <Pagination></Pagination>
+      <Pagination page={p} count={count}></Pagination>
     </div>
-  )
-}
+  );
+};
 
 export default EventListPage;
