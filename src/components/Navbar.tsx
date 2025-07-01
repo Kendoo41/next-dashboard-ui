@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { UserButton } from "@clerk/nextjs";
 
 const Navbar = () => {
   return (
@@ -24,7 +25,8 @@ const Navbar = () => {
           <span className="text-[10px] text-gray-500 text-right">Admin</span>
         </div>
         <div>
-          <Image src="/avatar.png" alt='' width={36} height={36} className="rounded-full"></Image>
+          {/* <Image src="/avatar.png" alt='' width={36} height={36} className="rounded-full"></Image> */}
+          <UserButton/>
         </div>
       </div>
     </div>
