@@ -199,7 +199,9 @@ const ResultListPage = async ({
             {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
-            <FormModal table="result" type="create"></FormModal>
+            {(role === "admin" || role === "teacher") && (
+              <FormModal table="assignment" type="create"></FormModal>
+            )}
           </div>
         </div>
       </div>

@@ -9,73 +9,48 @@ import { Class, Announcement, Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/setting";
 import { date } from "zod/v4-mini";
-
-const role = "admin";
+import { auth } from "@clerk/nextjs/server";
 
 type AnnouncementList = Announcement & { class: Class };
 
-const columns = [
-  {
-    header: "Title",
-    accessor: "title",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Action",
-    accessor: "action",
-  },
-];
-
-const renderRow = (item: AnnouncementList) => (
-  <tr
-    key={item.id}
-    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-  >
-    <td className="flex items-center gap-4 p-4">{item.title}</td>
-    <td>{item.class.name}</td>
-    <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-US").format(item.date)}
-    </td>
-    <td>
-      <div className="flex flex-row items-center gap-2">
-        {role === "admin" && (
-          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
-          //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
-          // </button>
-          <>
-            <FormModal
-              table="announcement"
-              type="update"
-              data={item}
-            ></FormModal>
-            <FormModal
-              table="announcement"
-              type="delete"
-              id={item.id}
-            ></FormModal>
-          </>
-        )}
-      </div>
-    </td>
-  </tr>
-); // End function renderRow
 
 const AnnouncementListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+
+  const { sessionClaims, userId } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const currentUserId = userId;
+
   const { page, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
+
+  const columns = [
+    {
+      header: "Title",
+      accessor: "title",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+      className: "hidden md:table-cell",
+    },
+    ...(role === "admin"
+      ? [
+          {
+            header: "Action",
+            accessor: "action",
+          },
+        ]
+      : []),
+  ];
 
   // URL PARAMS CONDITION
   const query: Prisma.AnnouncementWhereInput = {};
@@ -97,6 +72,19 @@ const AnnouncementListPage = async ({
       }
     }
   }
+// ROLE CONDITION
+  const roleConditions = {
+    teacher: { lessons: { some: { teacherId: currentUserId! } } },
+    student: { students: { some: { id: currentUserId! } } },
+    parent: { students: { some: { parentId: currentUserId! } } },
+  };
+
+  query.OR = [
+    { classId: null },
+    {
+      class: roleConditions[role as keyof typeof roleConditions] || {},
+    },
+  ];
 
   const [data, count] = await prisma.$transaction([
     prisma.announcement.findMany({
@@ -115,6 +103,40 @@ const AnnouncementListPage = async ({
       where: query,
     }),
   ]);
+
+  const renderRow = (item: AnnouncementList) => (
+    <tr
+      key={item.id}
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+    >
+      <td className="flex items-center gap-4 p-4">{item.title}</td>
+      <td>{item.class?.name || "-"}</td>
+      <td className="hidden md:table-cell">
+        {new Intl.DateTimeFormat("en-US").format(item.date)}
+      </td>
+      <td>
+        <div className="flex flex-row items-center gap-2">
+          {role === "admin" && (
+            // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
+            //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
+            // </button>
+            <>
+              <FormModal
+                table="announcement"
+                type="update"
+                data={item}
+              ></FormModal>
+              <FormModal
+                table="announcement"
+                type="delete"
+                id={item.id}
+              ></FormModal>
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  ); // End function renderRow
 
   return (
     <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
@@ -135,7 +157,9 @@ const AnnouncementListPage = async ({
             {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
-            <FormModal table="announcement" type="create"></FormModal>
+            {(role === "admin" || role === "teacher") && (
+              <FormModal table="assignment" type="create"></FormModal>
+            )}
           </div>
         </div>
       </div>
