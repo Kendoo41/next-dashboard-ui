@@ -122,7 +122,7 @@ const SubjectListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {role === "admin" && (
-              <FormModal table="assignment" type="create"></FormModal>
+              <FormModal table="subject" type="create"></FormModal>
             )}
           </div>
         </div>
