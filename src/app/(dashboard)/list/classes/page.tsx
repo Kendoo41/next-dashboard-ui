@@ -11,13 +11,11 @@ import { auth } from "@clerk/nextjs/server";
 
 type ClassList = Class & { supervisor: Teacher };
 
-
 const ClassListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-
   const { sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
@@ -86,7 +84,7 @@ const ClassListPage = async ({
       accessor: "supervisor",
       className: "hidden md:table-cell",
     },
-    ...(role === "admin" 
+    ...(role === "admin"
       ? [
           {
             header: "Action",
@@ -140,7 +138,7 @@ const ClassListPage = async ({
             {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
-            {(role === "admin" || role === "teacher") && (
+            {role === "admin" && (
               <FormModal table="assignment" type="create"></FormModal>
             )}
           </div>

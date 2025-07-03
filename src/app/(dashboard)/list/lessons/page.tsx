@@ -1,69 +1,29 @@
 import TableSearch from "@/components/TableSearch";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { lessonsData, role } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import FormModal from "@/components/FormModal";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/setting";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
+import { auth } from "@clerk/nextjs/server";
 
 type LessonList = Lesson & { teacher: Teacher } & { subject: Subject } & {
   class: Class;
 };
 
-const columns = [
-  {
-    header: "Subject Name",
-    accessor: "name",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-  },
-  {
-    header: "Teacher",
-    accessor: "teacher",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Action",
-    accessor: "action",
-  },
-];
-
-const renderRow = (item: LessonList) => (
-  <tr
-    key={item.id}
-    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-  >
-    <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
-    <td>{item.class.name}</td>
-    <td className="hidden md:table-cell">
-      {item.teacher.name + " " + item.teacher.surname}
-    </td>
-    <td>
-      <div className="flex flex-row items-center gap-2">
-        {role === "admin" && (
-          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
-          //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
-          // </button>
-          <>
-            <FormModal table="lesson" type="update" data={item}></FormModal>
-            <FormModal table="lesson" type="delete" id={item.id}></FormModal>
-          </>
-        )}
-      </div>
-    </td>
-  </tr>
-); // End function renderRow
 
 const LessonListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+
+  const { sessionClaims, userId } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const currentUserId = userId;
+
   const { page, ...queryParams } = searchParams;
 
   const p = page ? parseInt(page) : 1;
@@ -116,6 +76,56 @@ const LessonListPage = async ({
     }),
   ]);
 
+  const columns = [
+    {
+      header: "Subject Name",
+      accessor: "name",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+    },
+    {
+      header: "Teacher",
+      accessor: "teacher",
+      className: "hidden md:table-cell",
+    },
+      ...(role === "admin"
+        ? [
+            {
+              header: "Action",
+              accessor: "action",
+            },
+          ]
+        : []),
+  ];
+
+  const renderRow = (item: LessonList) => (
+    <tr
+      key={item.id}
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+    >
+      <td className="flex items-center gap-4 p-4">{item.subject.name}</td>
+      <td>{item.class.name}</td>
+      <td className="hidden md:table-cell">
+        {item.teacher.name + " " + item.teacher.surname}
+      </td>
+      <td>
+        <div className="flex flex-row items-center gap-2">
+          {role === "admin" && (
+            // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
+            //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
+            // </button>
+            <>
+              <FormModal table="lesson" type="update" data={item}></FormModal>
+              <FormModal table="lesson" type="delete" id={item.id}></FormModal>
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  ); // End function renderRow
+
   return (
     <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
       {/* TOP  */}
@@ -133,7 +143,7 @@ const LessonListPage = async ({
             {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
-            {(role === "admin" || role === "teacher") && (
+            {(role === "admin") && (
               <FormModal table="assignment" type="create"></FormModal>
             )}
           </div>
