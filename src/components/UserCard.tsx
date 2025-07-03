@@ -5,13 +5,13 @@ const UserCard = async ({
 }: {
   type: "admin" | "teacher" | "student" | "parent";
 }) => {
+
   const modelMap: Record<typeof type, any> = {
     admin: prisma.admin,
     teacher: prisma.teacher,
     student: prisma.student,
     parent: prisma.parent,
   };
-
   const data = await modelMap[type].count();
 
   return (
