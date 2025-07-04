@@ -1,7 +1,6 @@
 import TableSearch from "@/components/TableSearch";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { role } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import FormModal from "@/components/FormModal";
@@ -9,6 +8,7 @@ import { Prisma, Subject, Teacher } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/setting";
 import { auth } from "@clerk/nextjs/server";
+import FormContainer from "@/components/FormContainer";
 
 type SubjectList = Subject & { teachers: Teacher[] };
 
@@ -98,8 +98,8 @@ const SubjectListPage = async ({
             //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
             // </button>
             <>
-              <FormModal table="subject" type="update" data={item}></FormModal>
-              <FormModal table="subject" type="delete" id={item.id}></FormModal>
+              <FormContainer table="subject" type="update" data={item}></FormContainer>
+              <FormContainer table="subject" type="delete" id={item.id}></FormContainer>
             </>
           )}
         </div>
@@ -122,7 +122,7 @@ const SubjectListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {role === "admin" && (
-              <FormModal table="subject" type="create"></FormModal>
+              <FormContainer table="subject" type="create"></FormContainer>
             )}
           </div>
         </div>

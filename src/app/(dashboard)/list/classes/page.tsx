@@ -8,6 +8,7 @@ import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/setting";
 import { Class, Prisma, Teacher } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
+import FormContainer from "@/components/FormContainer";
 
 type ClassList = Class & { supervisor: Teacher };
 
@@ -112,8 +113,8 @@ const ClassListPage = async ({
             //   <Image src="/delete.png" alt="" width={16} height={16}></Image>
             // </button>
             <>
-              <FormModal table="class" type="update" data={item}></FormModal>
-              <FormModal table="class" type="delete" id={item.id}></FormModal>
+              <FormContainer table="class" type="update" data={item}></FormContainer>
+              <FormContainer table="class" type="delete" id={item.id}></FormContainer>
             </>
           )}
         </div>
@@ -139,7 +140,7 @@ const ClassListPage = async ({
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
             {role === "admin" && (
-              <FormModal table="assignment" type="create"></FormModal>
+              <FormContainer table="class" type="create"></FormContainer>
             )}
           </div>
         </div>

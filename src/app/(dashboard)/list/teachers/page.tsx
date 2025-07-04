@@ -3,12 +3,12 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import Image from "next/image";
 import Link from "next/link";
-import FormModal from "@/components/FormModal";
 import { Subject, Teacher, Class, Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { includes } from "zod/v4-mini";
 import { ITEM_PER_PAGE } from "@/lib/setting";
 import { auth } from "@clerk/nextjs/server";
+import FormContainer from "@/components/FormContainer";
 
 type TeacherList = Teacher & { subjects: Subject[] } & { classes: Class[] };
 
@@ -148,7 +148,7 @@ const TeacherListPage = async ({
             </button>
           </Link>
           {role === "admin" && (
-            <FormModal table="teacher" type="delete" id={item.id}></FormModal>
+            <FormContainer table="teacher" type="delete" id={item.id}></FormContainer>
           )}
         </div>
       </td>
@@ -173,7 +173,7 @@ const TeacherListPage = async ({
                 <Image src="/plus.png" alt="" width={14} height={14}/>
               </button> */}
             {role === "admin" && (
-              <FormModal table="assignment" type="create"></FormModal>
+              <FormContainer table="teacher" type="create"></FormContainer>
             )}
           </div>
         </div>
