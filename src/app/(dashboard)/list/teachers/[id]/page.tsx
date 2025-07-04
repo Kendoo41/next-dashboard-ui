@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import FormContainer from "@/components/FormContainer";
 import { auth } from "@clerk/nextjs/server";
 import { Teacher } from "@prisma/client";
+import BigCalendarContainer from "@/components/BigCalendarContainer";
 
 const SingleTeacherPage = async ({
   params: { id },
@@ -101,10 +102,7 @@ const SingleTeacherPage = async ({
                 height={24}
                 className="w-6 h-6"
               />
-              <div className="">
-                <h1 className="text-xl font-semibold">90%</h1>
-                <span className="text-sm text-gray-400">Attendance</span>
-              </div>
+
             </div>
 
             {/* CARD LESSON */}
@@ -159,10 +157,10 @@ const SingleTeacherPage = async ({
         </div>
 
         {/* BOTTOM  */}
-        {/* <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
+        <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
           <h1>Teacher&apos;s Schedule</h1>
-          <BigCalendar></BigCalendar>
-        </div> */}
+          <BigCalendarContainer type="teacherId" id={teacher.id}></BigCalendarContainer>
+        </div>
       </div>
 
       {/* RIGHT  */}

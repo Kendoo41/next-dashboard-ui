@@ -193,7 +193,7 @@ useEffect(() => {
           )}
         </div>
         {/* UPLOAD  */}
-        {/* <CldUploadWidget
+        <CldUploadWidget
           uploadPreset="school"
           onSuccess={(result, { widget }) => {
             setImg(result.info);
@@ -211,7 +211,7 @@ useEffect(() => {
               </div>
             );
           }}
-        </CldUploadWidget> */}
+        </CldUploadWidget>
       </div>
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
